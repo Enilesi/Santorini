@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include<string.h>
+#include<ctype.h> //for strch
 #define BOARD_SIZE 5
 
 typedef struct 
@@ -77,17 +79,13 @@ void init_not_4_players(int i)
         {
             err("Error reading worker's color");
         }
-
-    if(i%2==0&&player[i].worker[1].color!=player[i-1].worker[1].color)
-        {
-            err("Error reading worker's color: two teammates must have the same colors!");
-        }
     player[i].worker[2].color=player[i].worker[1].color;
 }
 
 void initialize_game() 
 {
-    printf("Enter the number of players: ");
+
+    printf("LET'S START THE GAME!\n\nEnter the number of players: ");
     if (scanf("%d", &numPlayers) != 1) 
     {
         err("Error reading number of players");
@@ -100,10 +98,27 @@ void initialize_game()
     {
         if(numPlayers==4)
         {
-            if(i==1)printf("Enter first team:\n");
-            else if(i==3)printf("Enter second team:\n");
+            if(i==1)printf("\n\nEnter first team:\n");
+            else if(i==3)printf("\n\nEnter second team:\n");
         }
-        printf("Enter the name for player:\n");
+        switch (i)
+        {
+        case 1:
+            printf("\nEnter the name for first player:\n");
+            break;
+        case 2:
+            printf("\nEnter the name for second player:\n");
+            break;
+        case 3:
+            printf("\nEnter the name for third player:\n");
+            break;
+        case 4:
+            printf("\nEnter the name for fourth player:\n");
+            break;
+        
+        default:
+            break;
+        }
         if (scanf("%49s", player[i].name) != 1) 
         {
             err("Error reading player name");
@@ -153,32 +168,85 @@ int is_valid_move(int x, int y, Worker worker)
     return 1;
 }
 
-void construct_building(int x, int y)
+void win(int i, int j)
+{
+    if(numPlayers!=4)
+        {
+            printf(" THE GAME IS OVER!\n%s won the chalenge",player[i].name);
+            exit(0);
+        }
+    else
+        {
+            if(i<3)
+                {
+                    printf(" THE GAME IS OVER!\nThe first team composed of %s and %s won the chalenge",player[1].name, player[2].name);
+                    exit(0);
+                }
+            else 
+                {
+                    printf(" THE GAME IS OVER!\nThe second team composed of %s and %s won the chalenge",player[3].name, player[4].name);
+                    exit(0);
+                }
+            
+        }
+}
+
+void construct_building(int x, int y, int i, int j)
 {
 
-    //must check if worker on that position or board is 3
     for(int i=1;i<=4;i++)
         for(int j=1;j<=2;j++)
         {
             if(player[i].worker[j].position.x==x&&player[i].worker[j].position.y==y)
-                printf("Change coordinates; You can't burry a worker in a building");
+                {
+                    printf("Invalid move. Get new position for the building:");
+                    return;
+                }
+            
         }
+    if(board[x][y]==3)
+        {
+            win(i,j);
+        }
+    board[x][y]++;
 
 }
 
 
-//i must create a struct for the dome because not every time i put a dome is a win
-//or pay attention that not always 4= win on the board
-//CSV for tomorrow
-//merge+insertion => timsort and why is eff more than them
+int move_worker(int x, int y,int i,int j)
+{
+    if(board[x][y]==3)
+        {
+                win(i,j);
+        }
+    if(is_valid_move(x,y,player[i].worker[j]))
+       {
+            player[i].worker[j].position.x=x;
+            player[i].worker[j].position.y=y;
+            return 1;
+       }
+  return 0;
+
+}
+
+//i must implement in main to have a 
+
+// i must check the colors to corespond
+//sa fac matricea char si sa pun D in loc de 4
 
 int main()
 {
-    // int opt=1;
-    print_board();
-    //printf("MENU/n 1.initialize game");
+
     initialize_game();
+    int x,y;
+    printf("\nIntroduce the coordinates of the workers (0->5)\nThe format is:\nx y\n");
+    scanf("%d %d",&x,&y);
+    int m=move_worker(x,y,1,1);
+    if(m==0)
+        {
+            printf("Ivalid move. Get new position for the worker:");
+        }
+    
+    print_board();
     return 0;
 }
-
-
