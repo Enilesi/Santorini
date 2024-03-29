@@ -1,0 +1,28 @@
+[1;30m test [0m
+[45mLET'S START THE GAME!
+
+Enter the number of players: 
+Enter the name for first player:
+Enter the color of Ana's workers:
+ B-blue
+ G-gray
+ W-white
+
+Enter the name for second player:
+Enter the color of Bob's workers:
+ B-blue
+ G-gray
+ W-white
+[1;30m test [0m
+ÿÿÿÿÿÿÿÿBB 0 0 0 0 0
+ 0 0 0 0 0
+ 0 0 0 0 0
+ 0 0 0 0 0
+ 0 0 0 0 0
+
+
+ 0 0 0 0 0
+ 0 0 0 0 0
+ 0 0 0 0 0
+ 0 0 0 0 0
+ 0 0 0 0 0

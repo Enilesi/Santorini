@@ -1,0 +1,10 @@
+Column Color Variety: Columns with no repeated colors.
+Row Color Variety: Rows with no repeated colors.
+Color Variety: Sets of one of each color anywhere.
+Color Diagonals: Count of diagonally adjacent same color dice.
+Light Shades: Sets of 1 & 2 values anywhere.
+Medium Shades: Sets of 3 & 4 values anywhere.
+Deep Shades: Sets of 5 & 6 values anywhere.
+Column Shade Valley: Columns with no repeated shades.
+Row Shade Variety: Rows with no repeated shades.
+Shade Variety: Sets of 1 of each shade.
