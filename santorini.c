@@ -14,6 +14,10 @@
 #define MAGENTA "\x1B[35m"
 #define CYAN    "\x1B[36m"
 #define WHITE   "\x1B[37m"
+#define ROWS 4
+#define COLUMNS 8
+#define LEN_CASES 15
+
 
 typedef struct 
 {
@@ -33,6 +37,12 @@ typedef struct
     Worker worker[2];
     char name[50]; //i shall do a function to verify if players have the same name, and if so, i must add an index
 }Player;
+
+typedef struct 
+{
+    Position position;
+}Dome;
+
 
 Player player[4];
 int board[BOARD_SIZE][BOARD_SIZE];
@@ -197,16 +207,221 @@ void print_legend() {
 
      printf("\n");
 }
+char cases_simple[ROWS][COLUMNS][LEN_CASES] = {
+    {
+        {"             "},
+        {"             "},
+        {"             "},
+        {"             "},
+        {"   __________"},
+        {"  /         /"},
+        {" /         / "},
+        {"/_________/  "}
+    },
+    {
+        {"             "},
+        {"             "},
+        {"             "},
+        {"   _________ "},
+        {"  /        /|"},
+        {" /________/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"             "},
+        {"             "},
+        {"   ________  "},
+        {"  /______ /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"             "},
+        {"    ______   "},
+        {"   /_____/|  "},
+        {"  |__3__| /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    }
+};
+
+char cases_dome[ROWS][COLUMNS][LEN_CASES] = {
+    {
+        {"             "},
+        {"             "},
+        {"             "},
+        {"             "},
+        {"   ___D_____ "},
+        {"  / /__/|   /"},
+        {" / |__|/   / "},
+        {"/_________/  "}
+    },
+    {
+        {"             "},
+        {"             "},
+        {"             "},
+        {"   ___D_____ "},
+        {"  / /__/|  /|"},
+        {" /_|__|/__/ |"},
+        {"|   1    | / "},
+        {"|________|/  "}
+    },
+    {
+        {"             "},
+        {"     _D_     "},
+        {"    /__/|__  "},
+        {"  /_|__|/_/| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"      _D_    "},
+        {"    _/__/|_  "},
+        {"   /|__|//|  "},
+        {"  |__3__| /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    }
+};
+
+char cases_girl[ROWS][COLUMNS][LEN_CASES] = {
+    {
+        {"             "},
+        {"             "},
+        {"             "},
+        {"             "},
+        {"   __*0*_____"},
+        {"  /  /|\\    /"},
+        {" /   / \\   / "},
+        {"/_________/  "}
+    },
+    {
+        {"             "},
+        {"             "},
+        {"     *0*     "},
+        {"   __/|\\____ "},
+        {"  /  / \\   /|"},
+        {" /________/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"             "},
+        {"     *0*     "},
+        {"   __/|\\___  "},
+        {"  /__/_\\_ /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"     *0*     "},
+        {"    _/|\\__   "},
+        {"   /_/_\\_/|  "},
+        {"  |__3__| /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    }
+};
+
+char cases_boy[ROWS][COLUMNS][LEN_CASES] = {
+    {
+        {"             "},
+        {"             "},
+        {"             "},
+        {"             "},
+        {"   ___0______"},
+        {"  /  /|\\    /"},
+        {" /   / \\   / "},
+        {"/_________/  "}
+    },
+    {
+        {"             "},
+        {"             "},
+        {"      0      "},
+        {"   __/|\\____ "},
+        {"  /  / \\   /|"},
+        {" /________/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"             "},
+        {"      0      "},
+        {"   __/|\\___  "},
+        {"  /__/_\\_ /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    },
+    {
+        {"      0      "},
+        {"    _/|\\__   "},
+        {"   /_/_\\_/|  "},
+        {"  |__3__| /| "},
+        {" |   2   | /|"},
+        {" |_______|/ |"},
+        {"|    1    | /"},
+        {"|_________|/ "}
+    }
+};
+
+int search_player_worker_pos(int x, int y)
+{
+    for(int k = 0; k < numPlayers; k++)
+        for(int l = 0; l < 2; l++)
+                if(player[k].worker[l].position.x == x && player[k].worker[l].position.y == y)
+                    return k;
+    return -1;
+}
+int search_worker_pos(int x, int y)
+{
+    for(int k = 0; k < numPlayers; k++)
+        for(int l = 0; l < 2; l++)
+                if(player[k].worker[l].position.x == x && player[k].worker[l].position.y == y)
+                    return l;
+    return -1;
+}
 
 void print_board() {
-    for(int i = 0; i < BOARD_SIZE; i++) {
-        for(int j = 0; j < BOARD_SIZE; j++) {
-            if(is_worker_on_the_position(i, j))
-                print_worker(i, j);
-            else if(board[i][j]==4)
-                printf("D");
-            else
-                printf("%2d", board[i][j]);
+    for (int i = 0; i < BOARD_SIZE; i++)
+     {
+        for (int k = 0; k < ROWS; k++)
+         {
+            for (int j = 0; j < BOARD_SIZE; j++) 
+            {
+                // int index_i = search_player_worker_pos(i, j);
+                // int index_j = search_worker_pos(i, j);
+                // if (index_i != -1 && index_j != -1) {
+                //     switch (player[index_i].worker[index_j].gender) {
+                //         case 'B':
+                //             printf("%s      ", cases_boy[board[i][j]][k]);
+                //             break;
+                //         case 'G':
+                //             printf("%s      ", cases_girl[board[i][j]][k]);
+                //             break;
+                //         default:
+                //             break;
+                //     }
+                // } 
+                // else {
+                    printf("%s      ", cases_simple[board[i][j]][k]);
+                //}
+            }
+            printf("\n");
         }
         printf("\n");
     }
@@ -229,6 +444,7 @@ int is_valid_move(int x, int y, int index_i, int index_j) {
         return 1;
     return 1;
 }
+
 
 void win(int i) {
     if(numPlayers != 4) {
@@ -400,6 +616,32 @@ int search_worker_index(int gender, int i)
     return -1;
 }
 
+// int construct_dome(int )
+// int god_power(int i)
+// {
+//     int ok=1;
+//     while(ok==1)
+//     {
+//         printf("\nDo you want to use the God Power?\nYes/No\n");
+//         char answear[4];
+//         scanf("%s",answear);
+//         if(strcmp(answear,"Yes")==0)
+//         {
+//             ok=0;
+//             return 1;
+//         }
+//         else if(strcmp(answear,"No")==0)
+//         {
+//             ok=0;
+//             return 0;
+//         }
+//         else 
+//         {
+//             printf("Invalid answear. Try again!");
+//         }
+//     }
+   
+// }
 void building(int i)
 {
     printf("\nLET'S BUILD!\nThe game looks like this:\n");
@@ -479,8 +721,8 @@ int main()
     {
         for(int i=0;i<numPlayers;i++)
         {
-            printf("%s, give your first option: build or move\n",player[i].name); // i must do a function to det if no valid moves=>win
-            char option[6];
+            printf("%s, give your first option: build or move\n",player[i].name); // i must do a function to det if no valid moves=>win  //2 players=> the other wins; 3 players=> the oth 2 continue the game
+            char option[2][6];
             scanf("%6s",option[0]);
             if (strcmp(option[0],"build")==0)
             {
