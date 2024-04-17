@@ -4,22 +4,30 @@
 #include <string.h>
 #include <ctype.h> //for strch
 #define BOARD_SIZE 5
-#define MAX_DOMES 22
+#define MAX_DOMES 18
 
-#define RESET   "\x1B[0m"
-#define BLACK   "\x1B[30m"
-#define RED     "\x1B[31m"
-#define GREEN   "\x1B[32m"
-#define YELLOW  "\x1B[33m"
-#define BLUE    "\x1B[34m"
-#define MAGENTA "\x1B[35m"
-#define CYAN    "\x1B[36m"
-#define WHITE   "\x1B[37m"
+#define PINK_HIGHLIGHT "\033[48;2;255;64;163m"
+#define BLUE_HIGHLIGHT "\033[48;2;0;158;254m"
+#define GREEN_HIGHLIGHT "\033[48;2;0;204;0m"
+#define HIGHLIGHT_RESET "\033[m"
+
+#define BACKGROUND "\033[48;2;234;182;224m"
+
+
+#define PINK "\033[38;2;255;64;163m"
+#define BLUE "\033[38;2;0;158;254m"
+#define GREEN "\033[38;2;0;204;0m"
+#define GOLD "\033[38;2;218;165;32m"
+#define PURPLE "\033[38;2;190;64;240m"
+
+
+#define RESET   "\033[m"
+
 #define ROWS 4
 #define COLUMNS 8
 #define LEN_CASES 15
 
-
+//i must do a function to check if no more moves and if so=> 
 typedef struct 
 {
     int x;
@@ -48,7 +56,7 @@ typedef struct
 Player player[4];
 int board[BOARD_SIZE][BOARD_SIZE];
 int numPlayers;
-int level1, level2, level3;
+int level1, level2, level3, domes;
 Dome dome[MAX_DOMES];
 
 void err( char *message)
@@ -80,16 +88,16 @@ void init_4_players(int i)
         err("Invalid choice. Two teammates can't have the same gender for a worker");
     }
 
-    printf("Enter the color of %s's worker:\n B-blue\n G-gray\n W-white\n", player[i].name);
+     printf("Enter the color of %s's worker:\n ->P-pink "PINK_HIGHLIGHT" "HIGHLIGHT_RESET"\n ->G-green "GREEN_HIGHLIGHT" "HIGHLIGHT_RESET"\n ->B-blue " BLUE_HIGHLIGHT" "HIGHLIGHT_RESET"\n \n", player[i].name);
  
     if (scanf(" %c", &player[i].worker[0].color) != 1) 
     {
         err("Error reading worker's color");
     }
 
-    if (player[i].worker[0].color != 'W' && player[i].worker[0].color != 'B' && player[i].worker[0].color != 'G')
+    if (player[i].worker[0].color != 'P' && player[i].worker[0].color != 'G' && player[i].worker[0].color != 'B')
     {
-        err("Invalid choice. Worker's color must be 'W', 'B', or 'G'");
+        err("Invalid choice. Worker's color must be 'B', 'P', or 'G'");
     }
 
     if ((i == 1 || i == 3) && player[i].worker[0].color != player[i - 1].worker[0].color)
@@ -104,15 +112,60 @@ void init_not_4_players(int i)
     player[i].worker[0].gender='G';
     player[i].worker[1].gender='B';
 
-    printf("Enter the color of %s's workers:\n B-blue\n G-gray\n W-white\n",player[i].name);
-    scanf(" %c", &player[i].worker[0].color); 
+    int ok=1;
+    while(ok==1)
+    {
+        int cond=1;
+        printf("\nEnter the color of %s's worker:\n ⟶ P: pink "PINK_HIGHLIGHT" "HIGHLIGHT_RESET"\n ⟶ G: green "GREEN_HIGHLIGHT" "HIGHLIGHT_RESET"\n ⟶ B: blue " BLUE_HIGHLIGHT" "HIGHLIGHT_RESET"\n \n", player[i].name);
+        scanf(" %c", &player[i].worker[0].color); 
+        if(player[i].worker[0].color!='P'&&player[i].worker[0].color!='B'&&player[i].worker[0].color!='G')
+            {
+                printf("Invalid color given. Try again!\n");
+                cond=0;
+            }
+        else if(i>0)
+        {
+            for(int j=i-1;j>=0;j--)
+                if(player[i].worker[0].color==player[j].worker[0].color)
+                {
+                    printf("Invalid color given. Two different players can't share a color!\n");
+                    cond=0;
+                }
+        }
+        if (cond==1)ok=0;
+    }
     player[i].worker[1].color=player[i].worker[0].color;
+}
+
+void print_header()
+{
+    char text[] = "LET'S START THE GAME!\n";
+    char *word = strtok(text, " \n");
+    int colorIndex = 0;
+
+    while (word != NULL) {
+        switch (colorIndex % 3) {
+            case 0:
+                printf(PINK "%s " RESET, word);
+                break;
+            case 1:
+                printf(BLUE "%s " RESET, word);
+                break;
+            case 2:
+                printf(GREEN "%s " RESET, word);
+                break;
+        }
+        word = strtok(NULL, " \n");
+        colorIndex++;
+    }
+    printf("\n");
 }
 
 void initialize_game() 
 {
-    printf("\033[45m");
-    printf("LET'S START THE GAME!\n\nEnter the number of players: ");
+    //printf("\033[45m");
+    print_header();
+    printf("\n\nEnter the number of players: ");
     if (scanf("%d", &numPlayers) != 1) 
     {
         err("Error reading number of players");
@@ -192,20 +245,21 @@ void print_worker(int x, int y)
             }
 }
 void print_legend() {
+    printf("Map:\n");
     for(int i = 0; i < numPlayers; i++) {
         if(player[i].name) {
             printf("%10s:", player[i].name);
             for(int j = 0; j < 2; j++) {
                 if(player[i].worker[j].color) {
                     switch (player[i].worker[j].color) {
-                        case 'G':
-                            printf("\033[0;37;40m %c%d \033[0m", player[i].worker[j].gender, j+1); /// l for B1 B2 G1 G2
-                            break;
-                        case 'W':
-                            printf("\033[0;30;47m %c%d \033[0m", player[i].worker[j].gender, j+1); /// l for B1 B2 G1 G2
+                        case 'P':
+                            printf(PINK_HIGHLIGHT " %c%d " HIGHLIGHT_RESET, player[i].worker[j].gender, j+1); /// l for B1 B2 G1 G2
                             break;
                         case 'B':
-                            printf("\033[0;37;44m %c%d \033[0m", player[i].worker[j].gender, j+1); /// l for B1 B2 G1 G2
+                            printf(BLUE_HIGHLIGHT" %c%d "HIGHLIGHT_RESET, player[i].worker[j].gender, j+1); /// l for B1 B2 G1 G2
+                            break;
+                        case 'G':
+                            printf(GREEN_HIGHLIGHT" %c%d "HIGHLIGHT_RESET, player[i].worker[j].gender, j+1); /// l for B1 B2 G1 G2
                             break;
                         default:
                             printf("N");
@@ -414,6 +468,14 @@ void indented_space(int i) {
         printf(" ");
     }
 }
+
+int check_if_exists_dome_on_that_pos(int x, int y)
+{
+    for(int i=0;i<domes;i++) //changed from max domes
+        if( dome[i].position.x==x&&dome[i].position.y==y&&dome[i].position.x!=-1)
+            return 1;
+    return 0;
+}
 void print_board() 
 {
     for (int i = 0; i < BOARD_SIZE; i++)
@@ -433,10 +495,10 @@ void print_board()
                             switch (player[index_i].worker[index_j].color)
                             {
                             case 'G':
-                                printf(BLACK "%s      " RESET, cases_boy[board[i][j]][k]);
+                                printf(GREEN "%s      " RESET, cases_boy[board[i][j]][k]);
                                 break;
-                            case 'W':
-                                printf(WHITE "%s      " RESET, cases_boy[board[i][j]][k]);
+                            case 'P':
+                                printf(PINK "%s      " RESET, cases_boy[board[i][j]][k]);
                                 break;
                             case 'B':
                                 printf(BLUE "%s      " RESET, cases_boy[board[i][j]][k]);
@@ -450,10 +512,10 @@ void print_board()
                             switch (player[index_i].worker[index_j].color)
                            {
                             case 'G':
-                                printf(BLACK "%s      " RESET, cases_girl[board[i][j]][k]);
+                                printf(GREEN "%s      " RESET, cases_girl[board[i][j]][k]);
                                 break;
-                            case 'W':
-                                printf(WHITE "%s      " RESET, cases_girl[board[i][j]][k]);
+                            case 'P':
+                                printf(PINK "%s      " RESET, cases_girl[board[i][j]][k]);
                                 break;
                             case 'B':
                                 printf(BLUE "%s      " RESET, cases_girl[board[i][j]][k]);
@@ -467,6 +529,10 @@ void print_board()
                             break;
                     }
                 } 
+                else if(check_if_exists_dome_on_that_pos(i,j))
+                {
+                    printf("%s      ", cases_dome[board[i][j]][k]);
+                }
                 else 
                 {
                     printf("%s      ", cases_simple[board[i][j]][k]);
@@ -481,9 +547,7 @@ void print_board()
 
 int is_valid_move(int x, int y, int index_i, int index_j) {
 
-    for(int i=0;i<MAX_DOMES;i++)  //check if domes
-        if(dome[i].position.x==x&&dome[i].position.y==y&&dome[i].position.x!=-1)
-            return 0;
+    if(check_if_exists_dome_on_that_pos(x,y)==1)return 0;
 
     if(board[x][y] == 4) return 0; //if dome
 
@@ -588,23 +652,26 @@ int is_building_in_the_boder(int x, int y, int i, int l)
     return 0;
 }
 
-int is_building_not_in_the_border(int x, int y, int i, int l)
-{
-    if(x>=1&&x<=3&&y>=1&&y<=3)
-            {
-                if(player[i].worker[l].position.x>=x-1&&player[i].worker[l].position.x<=x+1&& //no building where no worker
-                    player[i].worker[l].position.y>=y-1&&player[i].worker[l].position.x<=y+1)
-                        return 1;
+int is_building_not_in_the_border(int x, int y, int i, int l) {
+    if(check_if_exists_dome_on_that_pos(x,y)==1)return 0;
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if ((x + dx >= 0 && x + dx < BOARD_SIZE) && 
+                (y + dy >= 0 && y + dy < BOARD_SIZE) &&
+                (dx != 0 || dy != 0) && 
+                player[i].worker[l].position.x == x + dx &&
+                player[i].worker[l].position.y == y + dy) {
+                    return 1;
             }
+        }
+    }
     return 0;
-            
 }
+
 
 int is_valid_position_building(int x, int y, int i)
 {
-    for(int l=0;l<MAX_DOMES;l++) //if there is a dome on that position
-     if(dome[l].position.x==x&&dome[l].position.y==y&&dome[l].position.x!=-1)
-            return 0;
+    if(check_if_exists_dome_on_that_pos(x,y)==1)return 0;
 
     for(int k = 0; k < 4; k++)
         for(int l = 0; l < 2; l++) {
@@ -612,7 +679,7 @@ int is_valid_position_building(int x, int y, int i)
                 return 0;
             }
         }
-    if(player[i].worker[0].position.x==-1||player[i].worker[1].position.x==-1) //if it's your first time building
+    if(player[i].worker[0].position.x==-1&&player[i].worker[1].position.x==-1) //if it's your first time ever building
         return 1;
     int len;// how many workers each player has
     if(numPlayers==4) len=1;
@@ -623,6 +690,7 @@ int is_valid_position_building(int x, int y, int i)
             if(is_building_in_the_boder(x,y,i,l)==1||is_building_not_in_the_border(x,y,i,l)==1)
                 return 1;
         }
+    
     return 0;
 }
 
@@ -664,34 +732,81 @@ int search_worker_index(int gender, int i)
             return l;
    return -1;
 }
-
-int construct_dome(int x,int y) //i shall check if worker on that position
+int check_if_exists_worker_ont_that_pos(int x,int y)
 {
-    int all_domes=1;
-    for(int i=0;i<MAX_DOMES;i++)
-    {
-        if(dome[i].position.x==-1&&dome[i].position.y==-1)
+    int len=2;
+    if(numPlayers==4)len=1;
+    for(int i=0;i<numPlayers;i++)
         {
-            all_domes=0;
-            dome[i].position.x==x; ///or to 1, I shall think in the future
-            dome[i].position.y==y;
-            return 1;
+            for(int j=0;j<len;j++)
+                if(player[i].worker[j].position.x==x&&player[i].worker[j].position.y==y)
+                    return 1;
         }
-    }
-    if(all_domes==1)
+    return 0;
+}
+int construct_dome(int pos_x,int pos_y) //i shall check if worker on that position
+{
+    if(domes==18)
     {
         printf("Can't build domes anymore");
         return -1;
     }
+    if(check_if_exists_worker_ont_that_pos(pos_x,pos_y)==1) return 0;
+    if(check_if_exists_dome_on_that_pos(pos_x,pos_y)==0)
+    {
+            dome[domes].position.x=pos_x; ///or to 1, I shall think in the future
+            dome[domes].position.y=pos_y;
+            domes++;
+            return 1;
+    }
     return 0;
 }
+
+void print_atlas()
+{
+    printf(GOLD);
+
+    printf("                                                            \n");
+    printf("                                                            \n");
+    printf("                           .::::.                          \n");
+    printf("                       .-===-::.:-===-                      \n");
+    printf("                     -=:  .   :   .  .==.                   \n");
+    printf("                   .+:   .    :    :   .-=                  \n");
+    printf("                  .+:...-.....=.....-...-:+                 \n");
+    printf("                  +..   :     -     :    .:=                \n");
+    printf("                 -*#+  ..     -     :    . *                \n");
+    printf("                 +@@=::-::::::=:::::=::::-:*                \n");
+    printf("                 :%%%% ..     -     :    .   *                \n"); 
+    printf("                 -@@@   :     -     :    .-:                \n");
+    printf("                 %%@@@:..-:....=--:.:-...:=-                 \n");
+    printf("                :@@@@=   :  =@%%%%#=:   :=+=                 \n");
+    printf("                +@@@%%*-. . =#@%%#: .-=*#@#                 \n");
+    printf("                .#@@##%%@#*===+%%@#+-=+=+#@@%%                 \n");
+    printf("                  .+%%@@@@@%%#%%%%%%#+=@@%%@@@+                 \n");
+    printf("                     :*%%@@@@@@@@#@@*@@@%%+.                  \n");
+    printf("                      .@@%%@@@@@@*@@@-.                      \n");
+    printf("                       .%%@#%%%%#*@@@=                        \n");
+    printf("                        =@@%%%%@@#-                          \n");
+    printf("                        =@@%%@%%%%                           \n");
+    printf("                       -*%%%%####*.                         \n");
+    printf("                       #*##%%@@##+*##-                      \n");
+    printf("                      .@%%@@@@@%%*%%@@%%*:                    \n");
+    printf("                      *@@@@@@@@%%*@@@@@#@=                   \n");
+    printf("                .    :#@@@@@@@#-##*%%@@@%%.                   \n");
+    printf("               =@@@@@@+@%%%%://     :@@@%%.                    \n");
+    printf(RESET);
+}
+
+
 
 int god_power(int i)
 {
     int ok=1;
     while(ok==1)
     {
-        printf("\nDo you want to use the God Power?\nYes/No\n");
+        printf("\nDo you want to use the God Power?\n");
+        print_atlas();
+        printf("Yes/No\n");
         char answear[4];
         scanf("%s",answear);
         if(strcmp(answear,"Yes")==0)
@@ -722,7 +837,7 @@ int doming(int i)
             {
                 printf("Give your coordinates for the dome(0->4) with the format:\nx y\n");
                 int dome_x,dome_y;
-                scanf("%d %d",&dome_x,&dome_y);
+                scanf("%d %d",&dome_x,&dome_y); //I shall implement sth for invalid integers also
                 int answear=construct_dome(dome_x,dome_y);
                 if(answear==1)
                     {
@@ -817,7 +932,8 @@ void moving(int i)
 int main() 
 {
 
-    printf("\033[45m");
+    //printf("\033[45m");
+    //printf(BACKGROUND);
     initialize_game();
     print_legend();
     int ok=1;
