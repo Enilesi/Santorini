@@ -6,11 +6,11 @@
 no more moves=>
 
 -no worker has no free space for building:
-    -aka no more domes, level1, level2, level3 in the adjiacent place
+    -aka no more domes, level1, level2, level3 in the adjiacent place or other workers!!
 -can't jump anymore
     -aka sourounded by domes or other workers
 -can't climp on a building anymore =>
-    -too high or domes/workers
+    -too high or domes/workers  => deduced from 2nd
 -
 
 

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h> //for strch
 #define BOARD_SIZE 5
+
 #define MAX_DOMES 18
 
 #define PINK_HIGHLIGHT "\033[48;2;255;64;163m"
@@ -19,6 +20,7 @@
 #define GREEN "\033[38;2;0;204;0m"
 #define GOLD "\033[38;2;218;165;32m"
 #define PURPLE "\033[38;2;190;64;240m"
+#define LILA "\033[38;2;240;134;255m"
 
 
 #define RESET   "\033[m"
@@ -26,6 +28,8 @@
 #define ROWS 4
 #define COLUMNS 8
 #define LEN_CASES 15
+
+
 
 //i must do a function to check if no more moves and if so=> 
 typedef struct 
@@ -55,7 +59,7 @@ typedef struct
 
 Player player[4];
 int board[BOARD_SIZE][BOARD_SIZE];
-int numPlayers;
+int numPlayers, nr_workers;
 int level1, level2, level3, domes;
 Dome dome[MAX_DOMES];
 
@@ -174,6 +178,8 @@ void initialize_game()
     {
         err("Invalid. Number of players must be between 2 and 4. Exiting.\n");
     }
+    if(numPlayers==4)nr_workers=1;
+    else nr_workers=2;
     for (int i = 0; i < numPlayers; i++) 
     {
         if(numPlayers==4)
@@ -226,7 +232,7 @@ int is_worker_on_the_position(int x, int y)
 void print_worker(int x, int y)
 {
     for(int k = 0; k < numPlayers; k++)
-        for(int l = 0; l < 2; l++)
+        for(int l = 0; l < nr_workers; l++)
             {
                 if(player[k].worker[l].position.x == x && player[k].worker[l].position.y == y)
                     {
@@ -249,7 +255,7 @@ void print_legend() {
     for(int i = 0; i < numPlayers; i++) {
         if(player[i].name) {
             printf("%10s:", player[i].name);
-            for(int j = 0; j < 2; j++) {
+            for(int j = 0; j < nr_workers; j++) {
                 if(player[i].worker[j].color) {
                     switch (player[i].worker[j].color) {
                         case 'P':
@@ -652,7 +658,8 @@ int is_building_in_the_boder(int x, int y, int i, int l)
     return 0;
 }
 
-int is_building_not_in_the_border(int x, int y, int i, int l) {
+int is_building_not_in_the_border(int x, int y, int i, int l) 
+{
     if(check_if_exists_dome_on_that_pos(x,y)==1)return 0;
     for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
@@ -660,9 +667,10 @@ int is_building_not_in_the_border(int x, int y, int i, int l) {
                 (y + dy >= 0 && y + dy < BOARD_SIZE) &&
                 (dx != 0 || dy != 0) && 
                 player[i].worker[l].position.x == x + dx &&
-                player[i].worker[l].position.y == y + dy) {
+                player[i].worker[l].position.y == y + dy)
+                {
                     return 1;
-            }
+                }
         }
     }
     return 0;
@@ -681,11 +689,8 @@ int is_valid_position_building(int x, int y, int i)
         }
     if(player[i].worker[0].position.x==-1&&player[i].worker[1].position.x==-1) //if it's your first time ever building
         return 1;
-    int len;// how many workers each player has
-    if(numPlayers==4) len=1;
-    else len=2;
 
-    for(int l = 0; l < len; l++)//must verify if worker exists because i can have 4 players
+    for(int l = 0; l < nr_workers; l++)//must verify if worker exists because i can have 4 players
         {
             if(is_building_in_the_boder(x,y,i,l)==1||is_building_not_in_the_border(x,y,i,l)==1)
                 return 1;
@@ -723,22 +728,18 @@ int move_worker(int x, int y, int i, int j) {
 
 int search_worker_index(int gender, int i)
 {
-    int len;
-    if(numPlayers==4)len=1;
-    else len=2;
+
  
-    for(int l = 0; l < len; l++)
+    for(int l = 0; l < nr_workers; l++)
         if(player[i].worker[l].gender==gender)
             return l;
    return -1;
 }
 int check_if_exists_worker_ont_that_pos(int x,int y)
 {
-    int len=2;
-    if(numPlayers==4)len=1;
     for(int i=0;i<numPlayers;i++)
         {
-            for(int j=0;j<len;j++)
+            for(int j=0;j<nr_workers;j++)
                 if(player[i].worker[j].position.x==x&&player[i].worker[j].position.y==y)
                     return 1;
         }
@@ -929,6 +930,188 @@ void moving(int i)
     }
 }
 
+int surounded_by_buildings_and_domes(int x, int y)
+{
+    int count=0;
+    for(int j=0;j<domes;j++)
+            {
+                for (int dx = -1; dx <= 1; dx++) //no free space from buildings and domes
+                {
+                    for (int dy = -1; dy <= 1; dy++) 
+                    {
+                        if ((x + dx >= 0 && x + dx < BOARD_SIZE) && 
+                            (y + dy >= 0 && y + dy < BOARD_SIZE) &&
+                            (dx != 0 || dy != 0))
+                            {
+                                if(dome[j].position.x==x+dx&&dome[j].position.y==y+dy)
+                                    count++;
+                                else
+                                {
+                                    switch (board[x+dx][x+dy])
+                                    {
+                                    case 0:if(level1+1>22)count++;break;
+                                    case 1:if(level2+1>18)count++;break;
+                                    case 2:if(level3+1>14)count++;break;
+                                    case 3:if(domes+1>MAX_DOMES)count++;break;
+                                    default: break;
+                                    }
+                                }
+                            }
+                            
+                    }
+                }
+            }
+    return count;
+}
+
+int surounded_by_other_workers(int i, int x, int y)
+{
+    int count=0;
+
+    for (int j=0;j<numPlayers;j++)
+        for (int l=0;l<nr_workers;l++)
+            {
+                
+                for (int dx = -1; dx <= 1; dx++) 
+                {
+                    for (int dy = -1; dy <= 1; dy++) 
+                    {
+                        if ((x + dx >= 0 && x + dx < BOARD_SIZE) && 
+                            (y + dy >= 0 && y + dy < BOARD_SIZE) &&
+                            (dx != 0 || dy != 0)&&
+                            (player[j].worker[l].position.x==x+dx&&player[j].worker[l].position.y==y+dy)&&
+                            (player[j].worker[l].position.x!=player[i].worker[l].position.x&&
+                            player[j].worker[l].position.y!=player[i].worker[l].position.y))
+                        count++;
+                    }
+                }
+            }
+    return count;
+
+}
+
+int cant_build_anymore(int i)
+{
+    
+    int count1=surounded_by_buildings_and_domes(player[i].worker[0].position.x,player[i].worker[0].position.y)+surounded_by_other_workers(i,player[i].worker[0].position.x,player[i].worker[0].position.y);
+    int count2=0;
+    if(numPlayers<4) count2=surounded_by_buildings_and_domes(player[i].worker[1].position.x,player[i].worker[1].position.y)+surounded_by_other_workers(i,player[i].worker[1].position.x,player[i].worker[1].position.y);
+    if(count1>=8&&count2>=8)return 1;
+    return 0;
+}
+int no_climbing_position( int x, int y)
+{
+    int count=0;
+    for (int dx = -1; dx <= 1; dx++) 
+        {
+            for (int dy = -1; dy <= 1; dy++) 
+            {
+                if ((x + dx >= 0 && x + dx < BOARD_SIZE) && 
+                    (y + dy >= 0 && y + dy < BOARD_SIZE) &&
+                    (dx != 0 || dy != 0))
+                    {
+                        if((board[x+dx][y+dy]-board[x][y]>1)|| //too high
+                        is_worker_on_the_position(x+dx,y+dy)||  //worker
+                        check_if_exists_dome_on_that_pos(x+dx,y+dy) //dome
+                        )count++;
+                        
+                    }
+            }
+        }
+    return count;
+}
+int cant_climb_anymore(int i)
+{
+    
+    int count1=no_climbing_position(player[i].worker[0].position.x,player[i].worker[0].position.y);
+    int count2=0;
+    if (numPlayers<4) count2=no_climbing_position(player[i].worker[1].position.x,player[i].worker[1].position.y);
+    if(count1>=8&&count2>=8)return 1;
+    return 0;
+
+}
+
+
+void swapy_nr(int *a, int *b)
+{
+    int aux=*a;
+    *a=*b;
+    *b=aux;
+}
+
+void swapy_char(char *a, char *b)
+{
+    char aux=*a;
+    *a=*b;
+    *b=aux;
+}
+
+void swapy_strings(char *a,char *b)
+{
+    char *aux;
+    aux = strdup(a); //to alocate corectly
+    strcpy(a,b);
+    strcpy(b,aux);
+    free(aux); //because, as i alocate, I need to free
+
+}
+
+void interchange_players(int i1, int i2) {
+    for(int l = 0; l < nr_workers; l++) {
+        swapy_nr(&player[i1].worker[l].position.x, &player[i2].worker[l].position.x);
+        swapy_nr(&player[i1].worker[l].position.y, &player[i2].worker[l].position.y);
+        swapy_char(&player[i1].worker[l].color, &player[i2].worker[l].color);
+        swapy_char(&player[i1].worker[l].gender, &player[i2].worker[l].gender);
+    }
+    swapy_strings(player[i1].name, player[i2].name);
+}
+
+void delete_player(int i) {
+    for(int j = i; j < numPlayers - 1; j++) {
+        interchange_players(j, j + 1);
+    }
+    if(numPlayers == 3) {
+        for(int l = 0; l < nr_workers; l++) {
+            player[2].worker[l].position.x = -2;
+            player[2].worker[l].position.y = -2;
+            player[2].worker[l].gender = '\0';
+            player[2].worker[l].color = '\0';
+            player[2].name[0] = '\0'; 
+        }
+    } else {
+        for(int l = 0; l < nr_workers; l++) {
+            player[3].worker[l].position.x = -2;
+            player[3].worker[l].position.y = -2;
+            player[3].worker[l].gender = '\0';
+            player[3].worker[l].color = '\0';
+            player[3].name[0] = '\0'; 
+        }
+    }
+    numPlayers--;
+}
+
+int no_more_moves(int i)
+{
+    if(cant_climb_anymore(i)==1||cant_build_anymore(i)==1)
+    {
+        if(numPlayers>2)
+            {
+                printf("The player %s has been deleted as it has no more moves available.\n The game continues with the remaining players!\n",player[i].name);
+                delete_player(i);
+                return 1;
+            }
+        else 
+            {
+                printf("The player %s has been deleted as it has no more moves available.\n",player[i].name);
+                delete_player(i);
+                if(i==1) win(0);
+                else win(1); //it implies that player[0] won 
+                return 1;
+            }
+    }
+    return 0;
+}
+
 int main() 
 {
 
@@ -941,23 +1124,26 @@ int main()
     {
         for(int i=0;i<numPlayers;i++)
         {
-            printf("%s, give your first option: build or move\n",player[i].name); // i must do a function to det if no valid moves=>win  //2 players=> the other wins; 3 players=> the oth 2 continue the game
-            char option[2][6];
-            scanf("%6s",option[0]);
-            if (strcmp(option[0],"build")==0)
+            if(no_more_moves(i)==0)
             {
-                building(i);
-                moving(i);
-            }
-            else if (strcmp(option[0],"move")==0)
-            {
-                moving(i);
-                building(i);
-            }
-            else
-            {
-                printf("Inexistent option, try again!");
-                i--;
+                printf("%s, give your first option: build or move\n",player[i].name); // i must do a function to det if no valid moves=>win  //2 players=> the other wins; 3 players=> the oth 2 continue the game
+                char option[2][6];
+                scanf("%6s",option[0]);
+                if (strcmp(option[0],"build")==0)
+                {
+                    building(i);
+                    moving(i);
+                }
+                else if (strcmp(option[0],"move")==0)
+                {
+                    moving(i);
+                    building(i);
+                }
+                else
+                {
+                    printf("Inexistent option, try again!");
+                    i--;
+                }
             }
                 
         }
