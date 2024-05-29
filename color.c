@@ -1,44 +1,22 @@
-#include <stdio.h>
-#define PINK_HIGHLIGHT "\033[48;2;255;64;163m%s\033[m"
-#define BLUE_HIGHLIGHT "\033[48;2;0;158;254m%s\033[m"
-#define GREEN_HIGHLIGHT "\033[48;2;0;204;0m%s\033[m"
+#include <gtk/gtk.h>
 
-int main() {
-    // ANSI escape code to start black text with magenta highlight
-    printf("\033[1;30;45m"); // 1 is for bold, 30 is for black text color, 45 is for magenta highlight
+int main(int argc, char *argv[]) {
+    gtk_init(&argc, &argv);
 
-    // Print the text
-    printf("This text has black color with magenta highlight!\n");
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "Hello World");
+    gtk_window_set_default_size(GTK_WINDOW(window), 200, 100);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    // Reset color to default (0)
-    printf("\033[0m"); // ANSI escape code to reset colors
-    
-    // ANSI escape code to start black text with green highlight
-    printf("\033[1;30;42m"); // 1 is for bold, 30 is for black text color, 42 is for green highlight
+    GtkWidget *label = gtk_label_new("Hello, world!");
+    PangoFontDescription *font_desc = pango_font_description_new();
+    pango_font_description_set_size(font_desc, 20 * PANGO_SCALE); // Set font size to 20 points
+    gtk_widget_override_font(label, font_desc);
+    g_object_unref(font_desc);
 
-    // Print the text
-    printf("This text has black color with green highlight!\n");
+    gtk_container_add(GTK_CONTAINER(window), label);
+    gtk_widget_show_all(window);
 
-    // Reset color to default (0)
-    printf("\033[0m"); // ANSI escape code to reset colors
-     printf("\033[1;30;46m"); // 1 is for bold, 30 is for black text color, 46 is for cyan highlight
-
-    // Print the text
-    printf("This text has black color with cyan highlight!\n");
-
-    // Reset color to default (0)
-    printf("\033[0m"); // ANSI escape code to reset colors
-
-  printf ("\033[48:2:255:165:0m%s\033[m\n","Hello world");
-    printf ("\033[48;2;255;165;0m%s\033[m\n\n\n","Hello world");
-
-    printf(PINK_HIGHLIGHT"\n", "Hello world");
-    printf(BLUE_HIGHLIGHT"\n", "Hello world");
-    printf(GREEN_HIGHLIGHT"\n", "Hello world");
-
-    printf("\033[48;2;190;64;240m%s\033[m\n", "Hello world");
-
-
-
+    gtk_main();
     return 0;
 }
