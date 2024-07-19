@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <ctype.h> //for strch
+#include <ctype.h>  //for strch
+#include <unistd.h> // for printing with delay
 #define BOARD_SIZE 5
 
 #define MAX_DOMES 18
@@ -81,7 +82,7 @@ void init_4_players(int i)
 
     if (scanf(" %c", &player[i].worker[0].gender) != 1)
     {
-        err("Error reading worker's gender");
+        err(RED "Error reading worker's gender" RESET);
     }
 
     if ((i == 1 || i == 3) && player[i].worker[0].gender == player[i - 1].worker[0].gender)
@@ -93,17 +94,17 @@ void init_4_players(int i)
 
     if (scanf(" %c", &player[i].worker[0].color) != 1)
     {
-        err("Error reading worker's color");
+        err(RED "Error reading worker's color" RESET);
     }
 
     if (player[i].worker[0].color != 'P' && player[i].worker[0].color != 'G' && player[i].worker[0].color != 'B')
     {
-        err("Invalid choice. Worker's color must be 'B', 'P', or 'G'");
+        err(RED "Invalid choice. Worker's color must be 'B', 'P', or 'G'" RESET);
     }
 
     if ((i == 1 || i == 3) && player[i].worker[0].color != player[i - 1].worker[0].color)
     {
-        err("Invalid choice. Two teammates must have the same color for their workers");
+        err(RED "Invalid choice. Two teammates must have the same color for their workers" RESET);
     }
 }
 
@@ -189,9 +190,15 @@ void initialize_game()
         if (numPlayers == 4)
         {
             if (i == 0)
-                printf(LILA "\n\nEnter first team:\n" RESET);
+            {
+                printf("\n");
+                print_header("\n\n>>ENTER FIRST TEAM:\n");
+            }
             else if (i == 2)
-                printf(LILA "\n\nEnter second team:\n" RESET);
+            {
+                printf("\n");
+                print_header("\n\n>>ENTER SECOND TEAM:\n");
+            }
         }
         switch (i)
         {
@@ -469,7 +476,7 @@ void print_board()
     {
         for (int k = 0; k < COLUMNS; k++)
         {
-            indented_space(7 * (BOARD_SIZE - i)); // or 10
+            indented_space(5 * (BOARD_SIZE - i)); // or 10
             for (int j = 0; j < BOARD_SIZE; j++)
             {
 
@@ -526,17 +533,25 @@ void print_board()
                     printf("%s      ", cases_simple[board[i][j]][k]);
                 }
             }
+            if (k == 6)
+                printf("%d", i);
             printf("\n");
         }
         printf("\n");
     }
+    printf("\t  %d\t", 0);
+    printf("\t     %d\t", 1);
+    printf("\t        %d\t", 2);
+    printf("\t   %d\t", 3);
+    printf("\t      %d\t", 4);
+
+    printf("\n");
     print_legend();
 }
 
 int is_valid_move(int x, int y, int index_i, int index_j)
 {
-    if ((!isdigit(x)) || (!isdigit(y) || (x > 4) || (x < 0) || (y > 4) || (y < 0)))
-        return 0;
+
     if (check_if_exists_dome_on_that_pos(x, y) == 1)
         return 0;
 
@@ -675,7 +690,7 @@ int is_building_not_in_the_border(int x, int y, int i, int l)
 
 int is_valid_position_building(int x, int y, int i)
 {
-    if ((!isdigit(x)) || (!isdigit(y) || (x > 4) || (x < 0) || (y > 4) || (y < 0)))
+    if ((x > 4) || (x < 0) || (y > 4) || (y < 0))
         return 0;
     if (check_if_exists_dome_on_that_pos(x, y) == 1)
         return 0;
@@ -790,37 +805,37 @@ int construct_dome(int pos_x, int pos_y) // i shall check if worker on that posi
 
 void print_atlas()
 {
-    printf(GOLD);
+    // printf(GOLD);
 
-    printf("                                                            \n");
-    printf("                                                            \n");
-    printf("                           .::::.                          \n");
-    printf("                       .-===-::.:-===-                      \n");
-    printf("                     -=:  .   :   .  .==.                   \n");
-    printf("                   .+:   .    :    :   .-=                  \n");
-    printf("                  .+:...-.....=.....-...-:+                 \n");
-    printf("                  +..   :     -     :    .:=                \n");
-    printf("                 -*#+  ..     -     :    . *                \n");
-    printf("                 +@@=::-::::::=:::::=::::-:*                \n");
-    printf("                 :%%%% ..     -     :    .   *                \n");
-    printf("                 -@@@   :     -     :    .-:                \n");
-    printf("                 %%@@@:..-:....=--:.:-...:=-                 \n");
-    printf("                :@@@@=   :  =@%%%%#=:   :=+=                 \n");
-    printf("                +@@@%%*-. . =#@%%#: .-=*#@#                 \n");
-    printf("                .#@@##%%@#*===+%%@#+-=+=+#@@%%                 \n");
-    printf("                  .+%%@@@@@%%#%%%%%%#+=@@%%@@@+                 \n");
-    printf("                     :*%%@@@@@@@@#@@*@@@%%+.                  \n");
-    printf("                      .@@%%@@@@@@*@@@-.                      \n");
-    printf("                       .%%@#%%%%#*@@@=                        \n");
-    printf("                        =@@%%%%@@#-                          \n");
-    printf("                        =@@%%@%%%%                           \n");
-    printf("                       -*%%%%####*.                         \n");
-    printf("                       #*##%%@@##+*##-                      \n");
-    printf("                      .@%%@@@@@%%*%%@@%%*:                    \n");
-    printf("                      *@@@@@@@@%%*@@@@@#@=                   \n");
-    printf("                .    :#@@@@@@@#-##*%%@@@%%.                   \n");
-    printf("               =@@@@@@+@%%%%://     :@@@%%.                    \n");
-    printf(RESET);
+    // printf("                                                            \n");
+    // printf("                                                            \n");
+    // printf("                           .::::.                          \n");
+    // printf("                       .-===-::.:-===-                      \n");
+    // printf("                     -=:  .   :   .  .==.                   \n");
+    // printf("                   .+:   .    :    :   .-=                  \n");
+    // printf("                  .+:...-.....=.....-...-:+                 \n");
+    // printf("                  +..   :     -     :    .:=                \n");
+    // printf("                 -*#+  ..     -     :    . *                \n");
+    // printf("                 +@@=::-::::::=:::::=::::-:*                \n");
+    // printf("                 :%%%% ..     -     :    .   *                \n");
+    // printf("                 -@@@   :     -     :    .-:                \n");
+    // printf("                 %%@@@:..-:....=--:.:-...:=-                 \n");
+    // printf("                :@@@@=   :  =@%%%%#=:   :=+=                 \n");
+    // printf("                +@@@%%*-. . =#@%%#: .-=*#@#                 \n");
+    // printf("                .#@@##%%@#*===+%%@#+-=+=+#@@%%                 \n");
+    // printf("                  .+%%@@@@@%%#%%%%%%#+=@@%%@@@+                 \n");
+    // printf("                     :*%%@@@@@@@@#@@*@@@%%+.                  \n");
+    // printf("                      .@@%%@@@@@@*@@@-.                      \n");
+    // printf("                       .%%@#%%%%#*@@@=                        \n");
+    // printf("                        =@@%%%%@@#-                          \n");
+    // printf("                        =@@%%@%%%%                           \n");
+    // printf("                       -*%%%%####*.                         \n");
+    // printf("                       #*##%%@@##+*##-                      \n");
+    // printf("                      .@%%@@@@@%%*%%@@%%*:                    \n");
+    // printf("                      *@@@@@@@@%%*@@@@@#@=                   \n");
+    // printf("                .    :#@@@@@@@#-##*%%@@@%%.                   \n");
+    // printf("               =@@@@@@+@%%%%://     :@@@%%.                    \n");
+    // printf(RESET);
 }
 
 int god_power(int i)
@@ -828,7 +843,8 @@ int god_power(int i)
     int ok = 1;
     while (ok == 1)
     {
-        printf(LILA "\nDo you want to use the God Power?\n" RESET);
+        print_header("--- A T L A S ---\n");
+        printf(LILA "Do you want to use the God Power?\n" RESET);
         print_atlas();
         printf("Yes/No\n");
         char answear[4];
@@ -849,34 +865,41 @@ int god_power(int i)
         }
     }
 }
-
 int doming(int i)
 {
     if (god_power(i) == 1)
     {
-
         int ok = 1;
         while (ok == 1)
         {
-            printf(LILA "Give your coordinates for the dome(0->4) with the format:\nx y\n" RESET);
+            printf(LILA "Give your coordinates for the dome (0->4) with the format:\nx y\n" RESET);
             int dome_x, dome_y;
-            scanf("%d %d", &dome_x, &dome_y); // I shall implement sth for invalid integers also
-            int answear = construct_dome(dome_x, dome_y);
-            if (answear == 1)
+            if (scanf("%d %d", &dome_x, &dome_y) == 2)
             {
-                print_header("\nThe game looks now like this:\n");
-                print_board();
-                printf("\n");
-                ok = 0;
-                return 1;
+                int answer = construct_dome(dome_x, dome_y);
+                if (answer == 1)
+                {
+                    print_header("\nThe game looks now like this:\n");
+                    print_board();
+                    printf("\n");
+                    ok = 0;
+                    return 1;
+                }
+                else if (answer == 0)
+                {
+                    printf(RED "Invalid coordinates for the dome. Try again!" RESET);
+                }
+                else if (answer == -1)
+                {
+                    return 0;
+                }
             }
-            else if (answear == 0)
+            else
             {
-                printf(RED "Invalid coordinates for the dome. Try again!" RESET);
-            }
-            else if (answear == -1)
-            {
-                return 0;
+                printf(RED "Invalid input format. Please enter two integers separated by a space!\n" RESET);
+                int ch;
+                while ((ch = getchar()) != '\n' && ch != EOF)
+                    ;
             }
         }
     }
@@ -888,24 +911,34 @@ void building(int i)
     print_header("\nLET'S BUILD!");
     printf("\nThe game looks like this:\n");
     print_board();
+
     if (doming(i) == 0)
     {
         int ok = 1;
         while (ok == 1)
         {
-            printf(LILA "Give your coordinates for the building(0->4) with the format:\nx y\n" RESET);
+            printf(LILA "Give your coordinates for the building (0->4) with the format:\nx y\n" RESET);
             int building_x, building_y;
-            scanf("%d %d", &building_x, &building_y);
-            if (construct_building(building_x, building_y, i) == 1)
+            if (scanf("%d %d", &building_x, &building_y) == 2)
             {
-                printf("\nThe game looks now like this:\n");
-                print_board();
-                printf("\n");
-                ok = 0;
+                if (construct_building(building_x, building_y, i) == 1)
+                {
+                    printf("\nThe game looks now like this:\n");
+                    print_board();
+                    printf("\n");
+                    ok = 0;
+                }
+                else
+                {
+                    printf(RED "Invalid choice for the building. Try again!" RESET);
+                }
             }
             else
             {
                 printf(RED "Invalid choice for the building. Try again!" RESET);
+                int ch;
+                while ((ch = getchar()) != '\n' && ch != EOF)
+                    ;
             }
         }
     }
@@ -916,21 +949,33 @@ void moving(int i)
     print_header("\nLET'S MOVE!");
     printf("\nThe game looks like this:\n");
     print_board();
+
     int ok1 = 1;
     int worker_index;
     char gender;
+
     while (ok1 == 1)
     {
         printf(LILA "Give the gender of your worker, %s:\nB/G \n" RESET, player[i].name);
-        scanf(" %c", &gender);
-        worker_index = search_worker_index(gender, i);
-        if (worker_index == -1)
+
+        if (scanf(" %c", &gender) == 1)
         {
-            printf(RED "Invalid choice. Choose an existing worker!\n" RESET);
+            worker_index = search_worker_index(gender, i);
+            if (worker_index == -1)
+            {
+                printf(RED "Invalid choice. Choose an existing worker!\n" RESET);
+            }
+            else
+            {
+                ok1 = 0;
+            }
         }
         else
         {
-            ok1 = 0;
+            printf(RED "Invalid choice. Choose an existing worker!\n" RESET);
+            int ch;
+            while ((ch = getchar()) != '\n' && ch != EOF)
+                ;
         }
     }
 
@@ -939,17 +984,27 @@ void moving(int i)
     {
         printf(LILA "Give the coordinates for your worker (0->4),%s, with the format:\nx y\n" RESET, player[i].name);
         int worker_x, worker_y;
-        scanf("%d %d", &worker_x, &worker_y);
-        if (move_worker(worker_x, worker_y, i, worker_index) == 1)
+        if (scanf(" %d %d", &worker_x, &worker_y) == 2)
         {
-            printf("\nThe game looks now like this:\n");
-            print_board();
-            printf("\n");
-            ok2 = 0;
+            if (move_worker(worker_x, worker_y, i, worker_index) == 1)
+            {
+                printf("\nThe game looks now like this:\n");
+                print_board();
+                printf("\n");
+                ok2 = 0;
+            }
+            else
+            {
+                printf(RED "Invalid choice. Choose another set of coordinates for the worker!\n" RESET);
+            }
         }
         else
         {
-            printf(RED "Invalid choice. Choose a other coordinates for the worker!\n" RESET);
+            printf(RED "Invalid choice. Choose another set of coordinates for the worker!\n" RESET);
+            // Clear the input buffer
+            int ch;
+            while ((ch = getchar()) != '\n' && ch != EOF)
+                ;
         }
     }
 }
@@ -1164,7 +1219,7 @@ int main()
 
     // printf("\033[45m");
     // printf(BACKGROUND);
-    printf("\xF0\x9F\x91\xA7\n");
+    // printf("\xF0\x9F\x91\xA7\n");
     initialize_game();
     print_legend();
     int ok = 1;
