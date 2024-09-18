@@ -29,7 +29,6 @@
 #define COLUMNS 8
 #define LEN_CASES 15
 
-// i must do a function to check if no more moves and if so=>
 typedef struct
 {
     int x;
@@ -46,7 +45,7 @@ typedef struct
 typedef struct
 {
     Worker worker[2];
-    char name[50]; // i shall do a function to verify if players have the same name, and if so, i must add an index
+    char name[50]; 
 } Player;
 
 typedef struct
@@ -170,7 +169,7 @@ void print_header(char text[])
 
 void initialize_game()
 {
-    // printf("\033[45m");
+   
     print_header("LET'S START THE GAME!\n");
     printf(LILA "\n\nEnter the number of players:\n" RESET);
     if (scanf("%d", &numPlayers) != 1)
