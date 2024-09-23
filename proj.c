@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <ctype.h>  //for strch
-#include <unistd.h> // for printing with delay
+#include <ctype.h>
 #define BOARD_SIZE 5
 
 #define MAX_DOMES 18
@@ -116,7 +115,7 @@ void init_not_4_players(int i)
     while (ok == 1)
     {
         int cond = 1;
-        printf(LILA "\nEnter the color of %s's worker:\n" RESET " ⟶ P: pink " PINK_HIGHLIGHT " " HIGHLIGHT_RESET "\n ⟶ G: green " GREEN_HIGHLIGHT " " HIGHLIGHT_RESET "\n ⟶ B: blue " BLUE_HIGHLIGHT " " HIGHLIGHT_RESET "\n \n", player[i].name);
+        printf(LILA "\nEnter the color of %s's worker:\n" RESET " ->P: pink " PINK_HIGHLIGHT " " HIGHLIGHT_RESET "\n ->G: green " GREEN_HIGHLIGHT " " HIGHLIGHT_RESET "\n ->B: blue " BLUE_HIGHLIGHT " " HIGHLIGHT_RESET "\n \n", player[i].name);
         scanf(" %c", &player[i].worker[0].color);
         if (player[i].worker[0].color != 'P' && player[i].worker[0].color != 'B' && player[i].worker[0].color != 'G')
         {
@@ -475,7 +474,7 @@ void print_board()
     {
         for (int k = 0; k < COLUMNS; k++)
         {
-            indented_space(5 * (BOARD_SIZE - i)); // or 10
+            indented_space(5 * (BOARD_SIZE - i)); // or 10 (looks just as fine)
             for (int j = 0; j < BOARD_SIZE; j++)
             {
 
@@ -554,8 +553,8 @@ int is_valid_move(int x, int y, int index_i, int index_j)
     if (check_if_exists_dome_on_that_pos(x, y) == 1)
         return 0;
 
-    if (board[x][y] == 4)
-        return 0; // if dome
+    if (board[x][y] == 4)//=>  dome
+        return 0; 
 
     if ((x < 0 || y < 0) || ((x >= BOARD_SIZE || y >= BOARD_SIZE)))
         return 0;
@@ -705,7 +704,7 @@ int is_valid_position_building(int x, int y, int i)
     if (player[i].worker[0].position.x == -1 && player[i].worker[1].position.x == -1) // if it's your first time ever building
         return 1;
 
-    for (int l = 0; l < nr_workers; l++) // must verify if worker exists because i can have 4 players
+    for (int l = 0; l < nr_workers; l++) 
     {
         if (is_building_in_the_boder(x, y, i, l) == 1 || is_building_not_in_the_border(x, y, i, l) == 1)
             return 1;
@@ -757,7 +756,7 @@ int move_worker(int x, int y, int i, int j)
     if (board[x][y] == 3)
         win(i);
     if (is_valid_move(x, y, i, j))
-    { // i must also implement an else
+    {
         player[i].worker[j].position.x = x;
         player[i].worker[j].position.y = y;
         return 1;
@@ -783,7 +782,7 @@ int check_if_exists_worker_ont_that_pos(int x, int y)
     }
     return 0;
 }
-int construct_dome(int pos_x, int pos_y) // i shall check if worker on that position
+int construct_dome(int pos_x, int pos_y) 
 {
     if (domes == 18)
     {
@@ -794,7 +793,7 @@ int construct_dome(int pos_x, int pos_y) // i shall check if worker on that posi
         return 0;
     if (check_if_exists_dome_on_that_pos(pos_x, pos_y) == 0)
     {
-        dome[domes].position.x = pos_x; /// or to 1, I shall think in the future
+        dome[domes].position.x = pos_x; 
         dome[domes].position.y = pos_y;
         domes++;
         return 1;
@@ -802,40 +801,7 @@ int construct_dome(int pos_x, int pos_y) // i shall check if worker on that posi
     return 0;
 }
 
-void print_atlas()
-{
-    // printf(GOLD);
 
-    // printf("                                                            \n");
-    // printf("                                                            \n");
-    // printf("                           .::::.                          \n");
-    // printf("                       .-===-::.:-===-                      \n");
-    // printf("                     -=:  .   :   .  .==.                   \n");
-    // printf("                   .+:   .    :    :   .-=                  \n");
-    // printf("                  .+:...-.....=.....-...-:+                 \n");
-    // printf("                  +..   :     -     :    .:=                \n");
-    // printf("                 -*#+  ..     -     :    . *                \n");
-    // printf("                 +@@=::-::::::=:::::=::::-:*                \n");
-    // printf("                 :%%%% ..     -     :    .   *                \n");
-    // printf("                 -@@@   :     -     :    .-:                \n");
-    // printf("                 %%@@@:..-:....=--:.:-...:=-                 \n");
-    // printf("                :@@@@=   :  =@%%%%#=:   :=+=                 \n");
-    // printf("                +@@@%%*-. . =#@%%#: .-=*#@#                 \n");
-    // printf("                .#@@##%%@#*===+%%@#+-=+=+#@@%%                 \n");
-    // printf("                  .+%%@@@@@%%#%%%%%%#+=@@%%@@@+                 \n");
-    // printf("                     :*%%@@@@@@@@#@@*@@@%%+.                  \n");
-    // printf("                      .@@%%@@@@@@*@@@-.                      \n");
-    // printf("                       .%%@#%%%%#*@@@=                        \n");
-    // printf("                        =@@%%%%@@#-                          \n");
-    // printf("                        =@@%%@%%%%                           \n");
-    // printf("                       -*%%%%####*.                         \n");
-    // printf("                       #*##%%@@##+*##-                      \n");
-    // printf("                      .@%%@@@@@%%*%%@@%%*:                    \n");
-    // printf("                      *@@@@@@@@%%*@@@@@#@=                   \n");
-    // printf("                .    :#@@@@@@@#-##*%%@@@%%.                   \n");
-    // printf("               =@@@@@@+@%%%%://     :@@@%%.                    \n");
-    // printf(RESET);
-}
 
 int god_power(int i)
 {
@@ -844,7 +810,6 @@ int god_power(int i)
     {
         print_header("--- A T L A S ---\n");
         printf(LILA "Do you want to use the God Power?\n" RESET);
-        print_atlas();
         printf("Yes/No\n");
         char answear[4];
         scanf("%s", answear);
@@ -1000,7 +965,7 @@ void moving(int i)
         else
         {
             printf(RED "Invalid choice. Choose another set of coordinates for the worker!\n" RESET);
-            // Clear the input buffer
+            // To clear the input buffer:
             int ch;
             while ((ch = getchar()) != '\n' && ch != EOF)
                 ;
@@ -1140,10 +1105,10 @@ void swapy_char(char *a, char *b)
 void swapy_strings(char *a, char *b)
 {
     char *aux;
-    aux = strdup(a); // to alocate corectly
+    aux = strdup(a); // to alocate corectly (no bugs)
     strcpy(a, b);
     strcpy(b, aux);
-    free(aux); // because, as i alocate, I need to free
+    free(aux); 
 }
 
 void interchange_players(int i1, int i2)
@@ -1216,9 +1181,7 @@ int no_more_moves(int i)
 int main()
 {
 
-    // printf("\033[45m");
-    // printf(BACKGROUND);
-    // printf("\xF0\x9F\x91\xA7\n");
+    
     initialize_game();
     print_legend();
     int ok = 1;
